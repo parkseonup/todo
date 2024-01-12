@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" data-framework="javascript">
+  <head>
+    <meta charset="utf-8" />
+    <title>TodoMVC</title>
+    <link rel="stylesheet" href="node_modules/todomvc-common/base.css" />
+    <link rel="stylesheet" href="node_modules/todomvc-app-css/index.css" />
+  </head>
+  <body>
+    <!-- 동작 참고: https://todomvc.com/examples/vanillajs/ -->
+    <section class="todoapp">
+      <header class="header">
+        <h1>todos</h1>
+        <input
+          class="new-todo"
+          placeholder="What needs to be done?"
+          autofocus
+        />
+      </header>
+      <section class="main">
+        <input id="toggle-all" class="toggle-all" type="checkbox" />
+        <label for="toggle-all">Mark all as complete</label>
+        <ul class="todo-list">
+          <li>
+            <div class="view">
+              <input class="toggle" type="checkbox" />
+              <label>title</label>
+              <button class="destroy"></button>
+            </div>
+            <!-- 
+              label을 더블 클릭하면 title을 변경할 수 있는 input.edit을 출력하고 input.edit으로 포커스를 옮겨야 한다.
+
+              <input class="edit" />
+
+              input.edit가 포커스를 잃거나 Enter키를 누르면 작성한 title로 변경되고, input.edit창을 제거한다.
+             -->
+          </li>
+          <li class="completed">
+            <div class="view">
+              <input class="toggle" type="checkbox" />
+              <label>title</label>
+              <button class="destroy"></button>
+            </div>
+            <!-- 
+              label을 더블 클릭하면 title을 변경할 수 있는 input창을 출력해야 한다.
+              
+              <input class="edit" />
+
+              input.edit가 포커스를 잃거나 Enter키를 누르면 작성한 title로 변경되고, input.edit창을 제거한다.
+              -->
+          </li>
+        </ul>
+      </section>
+      <footer class="footer">
+        <span class="todo-count">
+          <!-- 
+            completed가 안된 todo item 개수에 따라 텍스트 출력
+
+            - 0개일 경우: "0 items left" 출력
+            - 1개일 경우: "1 item left" 출력
+            - 여러개일 경우: "3 items left" 출력
+           -->
+        </span>
+        <ul class="filters">
+          <li>
+            <a href="#/" class="selected">All</a>
+          </li>
+          <li>
+            <a href="#/active">Active</a>
+          </li>
+          <li>
+            <a href="#/completed">Completed</a>
+          </li>
+        </ul>
+        <button class="clear-completed">Clear completed</button>
+      </footer>
+    </section>
+    <footer class="info">
+      <p>Double-click to edit a todo</p>
+    </footer>
+  </body>
+</html>
