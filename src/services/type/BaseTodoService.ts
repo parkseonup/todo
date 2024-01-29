@@ -5,12 +5,12 @@ export class BaseTodoService {
     throw new Error('getAll 메서드가 정의되지 않았습니다.');
   }
 
-  add(newTodoValue: string): TodoData {
+  addItem(newTodoValue: string): TodoData {
     throw new Error('add 메서드가 정의되지 않았습니다.');
   }
 
-  modifyValue(id: TodoData['id'], value: string): TodoData {
-    throw new Error('modifyValue 메서드가 정의되지 않았습니다.');
+  EditValue(id: TodoData['id'], value: string): TodoData {
+    throw new Error('EditValue 메서드가 정의되지 않았습니다.');
   }
 
   toggleCompleted(id: TodoData['id']): TodoData {
@@ -21,7 +21,7 @@ export class BaseTodoService {
     throw new Error('toggleCompletedAll 메서드가 정의되지 않았습니다.');
   }
 
-  remove(ids: TodoData['id'][]): TodoListData {
+  deleteItem(ids: TodoData['id'][]): TodoListData {
     throw new Error('remove 메서드가 정의되지 않았습니다.');
   }
 }

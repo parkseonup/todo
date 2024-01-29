@@ -13,12 +13,12 @@ export class TodoService extends BaseTodoService {
     return this.api.getAll();
   }
 
-  add(newTodoValue: string): TodoData {
-    return this.api.add(newTodoValue);
+  addItem(newTodoValue: string): TodoData {
+    return this.api.addItem(newTodoValue);
   }
 
-  modifyValue(id: TodoData['id'], value: string): TodoData {
-    return this.api.modifyValue(id, value);
+  EditValue(id: TodoData['id'], value: string): TodoData {
+    return this.api.EditValue(id, value);
   }
 
   toggleCompleted(id: TodoData['id']): TodoData {
@@ -29,7 +29,7 @@ export class TodoService extends BaseTodoService {
     return this.api.toggleCompletedAll(state);
   }
 
-  remove(ids: TodoData['id'][]): TodoListData {
-    return this.api.remove(ids);
+  deleteItem(ids: TodoData['id'][]): TodoListData {
+    return this.api.deleteItem(ids);
   }
 }

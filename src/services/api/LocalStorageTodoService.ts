@@ -1,4 +1,4 @@
-import { TodoListData, TodoData } from '../../types/todo';
+import { TodoData, TodoListData } from '../../types/todo';
 import { BaseTodoService } from '../type/BaseTodoService';
 
 export class LocalStorageTodoService extends BaseTodoService {
@@ -28,7 +28,7 @@ export class LocalStorageTodoService extends BaseTodoService {
     return response ? JSON.parse(response) : [];
   }
 
-  add(newTodoValue: string): TodoData {
+  addItem(newTodoValue: string): TodoData {
     const id = `${Date.now()}`;
     const responseTodoList = this.getAll();
     const newTodo = {
@@ -44,7 +44,7 @@ export class LocalStorageTodoService extends BaseTodoService {
     return newTodo;
   }
 
-  modifyValue(id: TodoData['id'], value: string): TodoData {
+  EditValue(id: TodoData['id'], value: string): TodoData {
     const responseTodoList = this.getAll();
     const todoIndex = responseTodoList.findIndex((todo) => todo.id === id);
 
@@ -57,7 +57,7 @@ export class LocalStorageTodoService extends BaseTodoService {
 
     this.set(responseTodoList);
 
-    if (!this.has(id)) throw new Error('modifyValue 요청에 실패했습니다.');
+    if (!this.has(id)) throw new Error('EditValue 요청에 실패했습니다.');
 
     return responseTodoList[todoIndex];
   }
@@ -93,7 +93,7 @@ export class LocalStorageTodoService extends BaseTodoService {
     return newTodoList;
   }
 
-  remove(ids: TodoData['id'][]): TodoListData {
+  deleteItem(ids: TodoData['id'][]): TodoListData {
     const responseTodoList = this.getAll();
     const [newTodoList, removedTodoList] = responseTodoList.reduce<
       [TodoListData, TodoListData]
