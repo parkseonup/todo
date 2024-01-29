@@ -1,19 +1,17 @@
-import { ChangeEvent, MouseEvent, useMemo, useState } from 'react';
-import useTodo from './useTodo';
+import { useMemo, useState } from 'react';
+import TodoItem from './TodoItem';
+import { TodoService } from '../services/TodoService';
 import { LocalStorageTodoService } from '../services/api/LocalStorageTodoService';
+import useTodoReducer from '../reducer/useTodoReducer';
 import TodoInput from './TodoInput';
-import { TodoData } from '../types/todo';
+import { filters } from '../constans/filters';
+import TodoFilters from './TodoFilters';
+
+const todoService = new TodoService(LocalStorageTodoService);
 
 export default function TodoApp() {
-  const {
-    todoList,
-    add: addTodo,
-    modifyValue,
-    toggleCompleted,
-    toggleCompletedAll,
-    remove: removeTodo,
-  } = useTodo(LocalStorageTodoService);
-  const [editModeId, setEditModeId] = useState<string | null>(null);
+  const [todoList, dispatch] = useTodoReducer(todoService);
+  const [editModeId, setEditModeId] = useState<string>('');
   const [filter, setFilter] = useState<keyof typeof filters>('all');
 
   const filteredTodoList = useMemo(
@@ -35,22 +33,6 @@ export default function TodoApp() {
 
   const activedTodoAmount = todoList.length - completedTodoIdList.length;
 
-  const onEditMode = (e: MouseEvent, id: TodoData['id']) => {
-    if (e.detail === 2) setEditModeId(id);
-  };
-
-  const onEdit = (e: ChangeEvent<HTMLInputElement>, id: TodoData['id']) => {
-    modifyValue(id, e.target.value);
-  };
-
-  const onToggleCompletedAll = () => {
-    toggleCompletedAll(activedTodoAmount > 0);
-  };
-
-  const onClearCompletedTodo = () => {
-    removeTodo(completedTodoIdList);
-  };
-
   return (
     <section className='todoapp'>
       <header className='header'>
@@ -58,7 +40,11 @@ export default function TodoApp() {
         <TodoInput
           className='new-todo'
           placeholder='What needs to be done?'
-          onEnter={(inputValue) => addTodo(inputValue)}
+          onEnter={(input) => {
+            dispatch({ type: 'ADD_ITEM', value: input.value });
+            input.value = '';
+            input.focus();
+          }}
         />
       </header>
 
@@ -70,7 +56,12 @@ export default function TodoApp() {
               className='toggle-all'
               type='checkbox'
               checked={activedTodoAmount === 0}
-              onChange={onToggleCompletedAll}
+              onChange={() =>
+                dispatch({
+                  type: 'TOGGLE_COMPLETED_ALL',
+                  state: activedTodoAmount > 0,
+                })
+              }
             />
             <label htmlFor='toggle-all'>Mark all as complete</label>
           </>
@@ -78,36 +69,13 @@ export default function TodoApp() {
 
         <ul className='todo-list'>
           {filteredTodoList.map((todo) => (
-            <li
+            <TodoItem
               key={todo.id}
-              className={`
-              ${todo.completed ? 'completed' : ''} 
-              ${editModeId === todo.id ? 'editing' : ''}
-            `}
-              onClick={(e) => onEditMode(e, todo.id)}
-            >
-              <div className='view'>
-                <input
-                  className='toggle'
-                  type='checkbox'
-                  checked={todo.completed}
-                  onChange={() => toggleCompleted(todo.id)}
-                />
-                <label>{todo.value}</label>
-                <button
-                  type='button'
-                  className='destroy'
-                  onClick={() => removeTodo([todo.id])}
-                ></button>
-              </div>
-              {editModeId === todo.id ? (
-                <TodoInput
-                  className='edit'
-                  onEnter={(inputValue) => addTodo(inputValue)}
-                  onChange={(e) => onEdit(e, todo.id)}
-                />
-              ) : null}
-            </li>
+              data={todo}
+              isEditing={editModeId === todo.id}
+              setEditModeId={setEditModeId}
+              dispatch={dispatch}
+            />
           ))}
         </ul>
       </section>
@@ -118,22 +86,18 @@ export default function TodoApp() {
             {activedTodoAmount} item{activedTodoAmount === 1 ? '' : 's'} left
           </span>
 
-          <ul className='filters'>
-            {(Object.keys(filters) as (keyof typeof filters)[]).map((key) => (
-              <li key={key}>
-                <a
-                  href={filters[key].path}
-                  className={filter === key ? 'selected' : ''}
-                  onClick={() => setFilter(key)}
-                >
-                  {filters[key].view}
-                </a>
-              </li>
-            ))}
-          </ul>
+          <TodoFilters value={filter} onClick={(value) => setFilter(value)} />
 
           {completedTodoIdList.length > 0 ? (
-            <button className='clear-completed' onClick={onClearCompletedTodo}>
+            <button
+              className='clear-completed'
+              onClick={() =>
+                dispatch({
+                  type: 'DELETED_ITEM',
+                  ids: completedTodoIdList,
+                })
+              }
+            >
               Clear completed
             </button>
           ) : null}
@@ -142,18 +106,3 @@ export default function TodoApp() {
     </section>
   );
 }
-
-const filters = {
-  all: {
-    path: '#/',
-    view: 'All',
-  },
-  active: {
-    path: '#/active',
-    view: 'Active',
-  },
-  completed: {
-    path: '#/completed',
-    view: 'Completed',
-  },
-};

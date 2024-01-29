@@ -1,7 +1,13 @@
-import { useRef, KeyboardEvent, InputHTMLAttributes, useEffect } from 'react';
+import {
+  useRef,
+  KeyboardEvent,
+  InputHTMLAttributes,
+  useEffect,
+  ChangeEvent,
+} from 'react';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
-  onEnter: (inputValue: string) => void;
+  onEnter?: (input: HTMLInputElement) => void;
 }
 
 export default function TodoInput({ onEnter, ...props }: Props) {
@@ -13,9 +19,12 @@ export default function TodoInput({ onEnter, ...props }: Props) {
     if (!inputRef.current) return;
     if (inputRef.current.value.length === 0) return;
 
-    onEnter(inputRef.current.value);
-    inputRef.current.value = '';
-    inputRef.current.focus();
+    onEnter?.(inputRef.current);
+  };
+
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!inputRef.current) return;
+    inputRef.current.value = e.target.value;
   };
 
   useEffect(() => {
@@ -24,5 +33,7 @@ export default function TodoInput({ onEnter, ...props }: Props) {
     inputRef.current.focus();
   }, []);
 
-  return <input ref={inputRef} onKeyDown={_onEnter} {...props} />;
+  return (
+    <input ref={inputRef} onKeyDown={_onEnter} {...props} onChange={onChange} />
+  );
 }
