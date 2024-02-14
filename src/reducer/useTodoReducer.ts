@@ -1,40 +1,53 @@
 import { useReducer } from 'react';
-import { TodoAction } from './useTodoReducer.type';
-import { BaseTodoService } from '../services/type/BaseTodoService';
-import { TodoListData } from '../types/todo';
+import { Action, TodoReducerState } from './useTodoReducer.type';
 
-let api: BaseTodoService;
-
-// FIXME: fetch는 따로 만들고, fetch 결과값을 dispatch 해야 함.
-export default function useTodoReducer(
-  apiService: BaseTodoService
-): [TodoListData, React.Dispatch<TodoAction>] {
-  api = apiService;
-
-  return useReducer(todoReducer, api.getAll());
+export default function useTodoReducer() {
+  return useReducer(todoReducer, defaultState);
 }
 
-function todoReducer(todoList: TodoListData, action: TodoAction) {
+const defaultState: TodoReducerState = {
+  status: 'success',
+  data: [],
+};
+
+function todoReducer(
+  state: TodoReducerState,
+  action: Action
+): TodoReducerState {
   switch (action.type) {
-    case 'ADD_ITEM': {
-      api.addItem(action.value);
-      return api.getAll();
+    case 'fetchStart': {
+      return { ...state, status: 'pending' };
     }
-    case 'EDIT_VALUE': {
-      api.EditValue(action.id, action.value);
-      return api.getAll();
+    case 'fetchEnd': {
+      return { ...state, status: 'end' };
     }
-    case 'TOGGLE_COMPLETED': {
-      api.toggleCompleted(action.id);
-      return api.getAll();
+    case 'fetchError': {
+      return { ...state, status: 'error' };
     }
-    case 'TOGGLE_COMPLETED_ALL': {
-      api.toggleCompletedAll(action.state);
-      return api.getAll();
+    case 'getAll': {
+      return { ...state, data: action.payload };
     }
-    case 'DELETED_ITEM': {
-      api.deleteItem(action.ids);
-      return api.getAll();
+    case 'addItem': {
+      return { ...state, data: [action.payload, ...state.data] };
+    }
+    case 'updateItem': {
+      return {
+        ...state,
+        data: state.data.map((todo) =>
+          todo.id === action.payload.id ? action.payload : todo
+        ),
+      };
+    }
+    case 'toggleCompletedAll': {
+      return { ...state, data: action.payload };
+    }
+    case 'deleteItem': {
+      return {
+        ...state,
+        data: state.data.filter(
+          (todo) => !action.payload.deletedIds.includes(todo.id)
+        ),
+      };
     }
   }
 }

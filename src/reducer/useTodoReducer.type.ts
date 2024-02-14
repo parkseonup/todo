@@ -1,34 +1,55 @@
-import { TodoData } from '../types/todo';
+import { TodoData, TodoListData } from '../types/todo';
 
-interface AddItemAction {
-  type: 'ADD_ITEM';
-  value: TodoData['value'];
+export interface FetchStartAction {
+  type: 'fetchStart';
 }
 
-interface EditItemAction {
-  type: 'EDIT_VALUE';
-  id: TodoData['id'];
-  value: TodoData['value'];
+export interface FetchEndAction {
+  type: 'fetchEnd';
 }
 
-interface ToggleCompletedAction {
-  type: 'TOGGLE_COMPLETED';
-  id: TodoData['id'];
+export interface FetchErrorAction {
+  type: 'fetchError';
+  payload: Error;
 }
 
-interface ToggleCompletedAllAction {
-  type: 'TOGGLE_COMPLETED_ALL';
-  state: boolean;
+export type FetchAction = FetchStartAction | FetchEndAction | FetchErrorAction;
+
+export interface GetAllAction {
+  type: 'getAll';
+  payload: TodoListData;
 }
 
-interface DeletedItemAction {
-  type: 'DELETED_ITEM';
-  ids: TodoData['id'][];
+export interface AddItemAction {
+  type: 'addItem';
+  payload: TodoData;
+}
+
+export interface UpdateItemAction {
+  type: 'updateItem';
+  payload: TodoData;
+}
+
+export interface ToggleCompletedAllAction {
+  type: 'toggleCompletedAll';
+  payload: TodoListData;
+}
+
+export interface DeletedItemAction {
+  type: 'deleteItem';
+  payload: { deletedIds: TodoData['id'][] };
 }
 
 export type TodoAction =
+  | GetAllAction
   | AddItemAction
-  | EditItemAction
-  | ToggleCompletedAction
+  | UpdateItemAction
   | ToggleCompletedAllAction
   | DeletedItemAction;
+
+export type Action = TodoAction | FetchAction;
+
+export interface TodoReducerState {
+  status: 'pending' | 'success' | 'error' | 'end';
+  data: TodoListData;
+}
