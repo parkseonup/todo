@@ -1,35 +1,93 @@
-import { TodoData, TodoListData } from '../types/todo';
-import { BaseTodoService } from './type/BaseTodoService';
+import {
+  AddItemAction,
+  DeletedItemAction,
+  GetAllAction,
+  UpdateItemAction,
+  ToggleCompletedAllAction,
+} from '../reducer/useTodoReducer.type';
+import { TodoData } from '../types/todo';
+import { TodoServiceType } from './TodoService.type';
 
-export class TodoService extends BaseTodoService {
-  api: BaseTodoService;
+type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
-  constructor(private apiService: typeof BaseTodoService) {
-    super();
-    this.api = new apiService();
+export default class TodoService implements TodoServiceType {
+  baseUrl: string;
+  headers = {
+    'Content-Type': 'application/json',
+  };
+
+  constructor(url: string) {
+    this.baseUrl = url;
   }
 
-  getAll(): TodoListData {
-    return this.api.getAll();
+  private async fetch(
+    method: Method,
+    options?: {
+      url?: string;
+      body?: RequestInit['body'];
+    }
+  ) {
+    const requestUrl = options?.url ? this.baseUrl + options.url : this.baseUrl;
+
+    try {
+      const response = await fetch(requestUrl, {
+        method,
+        headers: this.headers,
+        body: options?.body,
+      });
+
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+      return { type: 'fetchError', payload: error };
+    }
   }
 
-  addItem(newTodoValue: string): TodoData {
-    return this.api.addItem(newTodoValue);
+  async getAll(): Promise<GetAllAction> {
+    return {
+      type: 'getAll',
+      payload: await this.fetch('GET'),
+    };
   }
 
-  EditValue(id: TodoData['id'], value: string): TodoData {
-    return this.api.EditValue(id, value);
+  async addItem(value: string): Promise<AddItemAction> {
+    return {
+      type: 'addItem',
+      payload: await this.fetch('POST', {
+        body: JSON.stringify({ value }),
+      }),
+    };
   }
 
-  toggleCompleted(id: TodoData['id']): TodoData {
-    return this.api.toggleCompleted(id);
+  async updateItem(todo: TodoData): Promise<UpdateItemAction> {
+    return {
+      type: 'updateItem',
+      payload: await this.fetch('PATCH', {
+        url: `/${todo.id}`,
+        body: JSON.stringify(todo),
+      }),
+    };
   }
 
-  toggleCompletedAll(state: boolean): TodoListData {
-    return this.api.toggleCompletedAll(state);
+  async toggleCompletedAll(
+    completed: TodoData['completed']
+  ): Promise<ToggleCompletedAllAction> {
+    return {
+      type: 'toggleCompletedAll',
+      payload: await this.fetch('PATCH', {
+        body: JSON.stringify({ completed }),
+      }),
+    };
   }
 
-  deleteItem(ids: TodoData['id'][]): TodoListData {
-    return this.api.deleteItem(ids);
+  async deleteItem(ids: TodoData['id'][]): Promise<DeletedItemAction> {
+    const idsParam = ids.join('&');
+
+    return {
+      type: 'deleteItem',
+      payload: await this.fetch('DELETE', {
+        url: `/${idsParam}`,
+      }),
+    };
   }
 }
