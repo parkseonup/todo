@@ -1,16 +1,18 @@
 import { useMemo, useState } from 'react';
 import TodoItem from './TodoItem';
-import { TodoService } from '../services/TodoService';
-import { LocalStorageTodoService } from '../services/api/LocalStorageTodoService';
-import useTodoReducer from '../reducer/useTodoReducer';
 import TodoInput from './TodoInput';
 import { filters } from '../constans/filters';
 import TodoFilters from './TodoFilters';
-
-const todoService = new TodoService(LocalStorageTodoService);
+import useTodo from './hooks/useTodo';
 
 export default function TodoApp() {
-  const [todoList, dispatch] = useTodoReducer(todoService);
+  const {
+    state: { data: todoList },
+    addItem,
+    updateItem,
+    toggleCompletedAll,
+    deleteItem,
+  } = useTodo();
   const [editModeId, setEditModeId] = useState<string>('');
   const [filter, setFilter] = useState<keyof typeof filters>('all');
 
@@ -41,7 +43,7 @@ export default function TodoApp() {
           className='new-todo'
           placeholder='What needs to be done?'
           onEnter={(input) => {
-            dispatch({ type: 'ADD_ITEM', value: input.value });
+            addItem(input.value);
             input.value = '';
             input.focus();
           }}
@@ -56,12 +58,7 @@ export default function TodoApp() {
               className='toggle-all'
               type='checkbox'
               checked={activedTodoAmount === 0}
-              onChange={() =>
-                dispatch({
-                  type: 'TOGGLE_COMPLETED_ALL',
-                  state: activedTodoAmount > 0,
-                })
-              }
+              onChange={() => toggleCompletedAll(activedTodoAmount > 0)}
             />
             <label htmlFor='toggle-all'>Mark all as complete</label>
           </>
@@ -74,7 +71,8 @@ export default function TodoApp() {
               data={todo}
               isEditing={editModeId === todo.id}
               setEditModeId={setEditModeId}
-              dispatch={dispatch}
+              updateItem={updateItem}
+              deleteItem={deleteItem}
             />
           ))}
         </ul>
@@ -91,12 +89,7 @@ export default function TodoApp() {
           {completedTodoIdList.length > 0 ? (
             <button
               className='clear-completed'
-              onClick={() =>
-                dispatch({
-                  type: 'DELETED_ITEM',
-                  ids: completedTodoIdList,
-                })
-              }
+              onClick={() => deleteItem(completedTodoIdList)}
             >
               Clear completed
             </button>

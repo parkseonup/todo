@@ -1,20 +1,21 @@
 import { MouseEvent, Dispatch, SetStateAction } from 'react';
 import TodoInput from './TodoInput';
 import { TodoData } from '../types/todo';
-import { TodoAction } from '../reducer/useTodoReducer.type';
 
 interface Props {
   data: TodoData;
   isEditing: boolean;
   setEditModeId: Dispatch<SetStateAction<TodoData['id']>>;
-  dispatch: Dispatch<TodoAction>;
+  updateItem: (todo: TodoData) => void;
+  deleteItem: (ids: TodoData['id'][]) => void;
 }
 
 export default function TodoItem({
   data,
   isEditing,
   setEditModeId,
-  dispatch,
+  updateItem,
+  deleteItem,
 }: Props) {
   const onDoubleClick = (e: MouseEvent, id: TodoData['id']) => {
     if (e.detail === 2) setEditModeId(id);
@@ -39,23 +40,13 @@ export default function TodoItem({
           className='toggle'
           type='checkbox'
           checked={data.completed}
-          onChange={() =>
-            dispatch({
-              type: 'TOGGLE_COMPLETED',
-              id: data.id,
-            })
-          }
+          onChange={() => updateItem({ ...data, completed: !data.completed })}
         />
         <label>{data.value}</label>
         <button
           type='button'
           className='destroy'
-          onClick={() =>
-            dispatch({
-              type: 'DELETED_ITEM',
-              ids: [data.id],
-            })
-          }
+          onClick={() => deleteItem([data.id])}
         ></button>
       </div>
 
@@ -64,11 +55,7 @@ export default function TodoItem({
           className='edit'
           defaultValue={data.value}
           onEnter={(input) => {
-            dispatch({
-              type: 'EDIT_VALUE',
-              id: data.id,
-              value: input.value,
-            });
+            updateItem({ ...data, value: input.value });
             setEditModeId('');
           }}
         />
